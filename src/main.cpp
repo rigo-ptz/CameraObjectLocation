@@ -1,6 +1,7 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include "pixels_to_centimeters/Converter.hpp"
+#include "ball_find/BallFinder.hpp"
 
 void initConverter();
 
@@ -8,6 +9,8 @@ using namespace cv;
 
 int main() {
     initConverter();
+
+    BallFinder *ballFinder = new BallFinder("res/edge.png", true);
 
     waitKey(0);
     return 0;
