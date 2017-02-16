@@ -76,20 +76,20 @@ private:
 
     // Initiate min and max HSV filter values.
     // We can change them using trackbars
-    /*int H_MIN = 0;
+    int H_MIN = 0;
     int H_MAX = 256;
     int S_MIN = 0;
     int S_MAX = 256;
     int V_MIN = 0;
-    int V_MAX = 256;*/
+    int V_MAX = 256;
 
     // Find that this variants are the most suitable.
-    int H_MIN = 3;
-    int H_MAX = 6;
-    int S_MIN = 160;
-    int S_MAX = 163;
-    int V_MIN = 119;
-    int V_MAX = 145;
+    int H_MIN_IDEAL = 3;
+    int H_MAX_IDEAL = 6;
+    int S_MIN_IDEAL = 160;
+    int S_MAX_IDEAL = 163;
+    int V_MIN_IDEAL = 119;
+    int V_MAX_IDEAL = 145;
 
     enum TrackBarType {
         H_MIN_T, H_MAX_T,
