@@ -10,7 +10,7 @@ using namespace cv;
 int main() {
     initConverter();
 
-    BallFinder *ballFinder = new BallFinder("res/edge.png", true);
+    BallFinder *ballFinder = new BallFinder("res/edge.png", HSV_MOMENTS);
 
     waitKey(0);
     return 0;
@@ -35,7 +35,7 @@ void initConverter() {
     float x_dst, y_dst;
     pConverter->convertFromPixelsToCantimeters(718.0, 278.0, x_dst, y_dst);
 
-    delete pConverter;
+//    delete pConverter;
     pConverter = 0;
 }
 

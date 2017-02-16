@@ -8,6 +8,7 @@
 #include <highgui.h>
 #include <opencv2/opencv.hpp>
 #include <string>
+#include "../pixels_to_centimeters/Converter.hpp"
 
 /*
  * Try to do with Moments and With FindCircles
@@ -60,10 +61,18 @@
 using namespace std;
 using namespace cv;
 
+enum FindMethod {
+    HSV_MOMENTS
+};
+
 class BallFinder {
 private:
-    const string preprocessedImage = "HSV IMAGE";
-    const string trackbarWindowName = "Trackbars";
+    const string PREPROCESS_WINDOW_NAME = "HSV IMAGE";
+    const string TRACKBAR_WINDOW_NAME = "Trackbars";
+    const string RESULT_WINDOW_NAME = "Result";
+    const int MAX_DETECTED_OBJECT_COUNT = 10;
+    const double MIN_OBJECT_AREA = 10 * 10;
+    const double MAX_OBJECT_AREA = (1920 * 1090) / 1.5;
 
     // Initiate min and max HSV filter values.
     // We can change them using trackbars
@@ -74,6 +83,7 @@ private:
     int V_MIN = 0;
     int V_MAX = 256;*/
 
+    // Find that this variants are the most suitable.
     int H_MIN = 3;
     int H_MAX = 6;
     int S_MIN = 160;
@@ -90,6 +100,7 @@ private:
     Mat *pRawMat;
     Mat *pHSVMat;
     Mat *threshold;
+    void tryHSVMoments(const string &);
     void preprocessFrame();
     void createTrackbars();
     void morph();
@@ -99,7 +110,7 @@ private:
 
 
 public:
-    BallFinder(const string framePath, bool test);
+    BallFinder(const string framePath, const FindMethod &refMethod);
     BallFinder(const string videoPath);
     ~BallFinder();
 };
