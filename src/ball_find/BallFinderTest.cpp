@@ -2,42 +2,46 @@
 // Created by rigo on 15.02.17.
 //
 
-#include "BallFinder.hpp"
+#include "BallFinderTest.hpp"
 
-BallFinder::BallFinder(const string framePath, const FindMethod &refMethod) {
+BallFinderTest::BallFinderTest(const string framePath, const FindMethod &refMethod) {
+    pRawMat = new Mat();
+    pHSVMat = new Mat();
+    threshold = new Mat();
+
     switch (refMethod) {
         case HSV_MOMENTS:
             tryHSVMoments(framePath);
+            break;
+        case HSV_HOUGH_CIRCLES:
+            tryHSVHoughCircles(framePath);
             break;
         default:
             break;
     }
 }
 
-BallFinder::BallFinder(const string videoPath) {
+BallFinderTest::BallFinderTest(const string videoPath) {
 
 }
 
-BallFinder::~BallFinder() {
+BallFinderTest::~BallFinderTest() {
 
 }
 
-void BallFinder::tryHSVMoments(const string &refString) {
-    pRawMat = new Mat();
-    pHSVMat = new Mat();
-    threshold = new Mat();
+void BallFinderTest::tryHSVMoments(const string &refString) {
     *pRawMat = imread(refString, CV_LOAD_IMAGE_COLOR);
     createTrackbars();
     preprocessFrame();
 }
 
-void BallFinder::preprocessFrame() {
+void BallFinderTest::preprocessFrame() {
     cvtColor(*pRawMat, *pHSVMat, COLOR_BGR2HSV);
     namedWindow(PREPROCESS_WINDOW_NAME, CV_WINDOW_AUTOSIZE);
     imshow(PREPROCESS_WINDOW_NAME, *pHSVMat);
 }
 
-void BallFinder::createTrackbars() {
+void BallFinderTest::createTrackbars() {
     namedWindow(TRACKBAR_WINDOW_NAME,0);
 
     createTrackbar("H_MIN", TRACKBAR_WINDOW_NAME, &H_MIN, H_MAX, onTrackbarChanged, this);
@@ -48,8 +52,8 @@ void BallFinder::createTrackbars() {
     createTrackbar("V_MAX", TRACKBAR_WINDOW_NAME, &V_MAX, V_MAX, onTrackbarChanged, this);
 }
 
-void BallFinder::onTrackbarChanged(int value, void *type) {
-    BallFinder *pBallFinder = (BallFinder*) type;
+void BallFinderTest::onTrackbarChanged(int value, void *type) {
+    BallFinderTest *pBallFinder = (BallFinderTest*) type;
     inRange(*(pBallFinder->pHSVMat),
             Scalar(pBallFinder->H_MIN, pBallFinder->S_MIN, pBallFinder->V_MIN),
             Scalar(pBallFinder->H_MAX, pBallFinder->S_MAX, pBallFinder->V_MAX),
@@ -58,7 +62,7 @@ void BallFinder::onTrackbarChanged(int value, void *type) {
 //    TrackBarType* trackType = reinterpret_cast<TrackBarType*>(type);
 }
 
-void BallFinder::morph(){
+void BallFinderTest::morph(){
     Mat dilateElement = getStructuringElement(MORPH_ELLIPSE, Size(6, 6));
     dilate(*threshold, *threshold, dilateElement);
     dilate(*threshold, *threshold, dilateElement);
@@ -67,7 +71,7 @@ void BallFinder::morph(){
     findBall();
 }
 
-void BallFinder::findBall() {
+void BallFinderTest::findBall() {
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
 
@@ -99,7 +103,7 @@ void BallFinder::findBall() {
     }
 }
 
-void BallFinder::drawObject(int x, int y, Mat *pMat) {
+void BallFinderTest::drawObject(int x, int y, Mat *pMat) {
     Mat temp;
     pMat->copyTo(temp);
     circle(temp, Point(x,y), 20, Scalar(0,255,0), 2);
@@ -121,4 +125,63 @@ void BallFinder::drawObject(int x, int y, Mat *pMat) {
 
     namedWindow(RESULT_WINDOW_NAME, CV_WINDOW_AUTOSIZE);
     imshow(RESULT_WINDOW_NAME, temp);
+}
+
+void BallFinderTest::tryHSVHoughCircles(const string &refString) {
+    *pRawMat = imread(refString, CV_LOAD_IMAGE_COLOR);
+
+    cvtColor(*pRawMat, *pHSVMat, COLOR_BGR2HSV);
+
+    inRange(*pHSVMat,
+            Scalar(H_MIN_IDEAL, S_MIN_IDEAL, V_MIN_IDEAL),
+            Scalar(H_MAX_IDEAL, S_MAX_IDEAL, V_MAX_IDEAL),
+            *threshold);
+
+    Mat dilateElement = getStructuringElement(MORPH_ELLIPSE, Size(6, 6));
+    dilate(*threshold, *threshold, dilateElement);
+    dilate(*threshold, *threshold, dilateElement);
+
+    detectCircles();
+}
+
+void BallFinderTest::detectCircles() {
+    CvMemStorage *pStorage = cvCreateMemStorage(0);
+    IplImage*  thresholded = new IplImage(*threshold);
+
+    cvSmooth(thresholded, thresholded, CV_GAUSSIAN, 9, 9);
+
+    namedWindow("f", CV_WINDOW_AUTOSIZE);
+    imshow("f", *threshold);
+
+    CvSeq *pCirclesSeq = cvHoughCircles(thresholded, pStorage, CV_HOUGH_GRADIENT, 2,
+                                        MIN_DISTANCE_BETWEEN_CIRCLES_CENTERS,
+                                        100, 50, 20, 80);
+
+    Mat temp;
+    pRawMat->copyTo(temp);
+
+    for (int i = 0; i < pCirclesSeq->total; i++) {
+        float *p = (float*) cvGetSeqElem(pCirclesSeq, i);
+        printf("Ball! x=%f y=%f r=%f\n\r", p[0], p[1], p[2]);
+
+        circle(temp,
+               Point((int) p[0], (int) p[1]),
+               (int) p[2],
+               Scalar(0, 255, 0),
+               2);
+
+        char res[50];
+        sprintf (res, "x: %.2f, y: %.2f", p[0], p[1]);
+        putText(temp,
+                res,
+                Point((int) p[0], (int) (p[1] + 30)),
+                1,
+                1,
+                Scalar(0, 255, 0),
+                2);
+    }
+
+    namedWindow(RESULT_WINDOW_NAME, CV_WINDOW_AUTOSIZE);
+    imshow(RESULT_WINDOW_NAME, temp);
+
 }

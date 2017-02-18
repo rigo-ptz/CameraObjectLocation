@@ -62,10 +62,11 @@ using namespace std;
 using namespace cv;
 
 enum FindMethod {
-    HSV_MOMENTS
+    HSV_MOMENTS,
+    HSV_HOUGH_CIRCLES
 };
 
-class BallFinder {
+class BallFinderTest {
 private:
     const string PREPROCESS_WINDOW_NAME = "HSV IMAGE";
     const string TRACKBAR_WINDOW_NAME = "Trackbars";
@@ -73,6 +74,7 @@ private:
     const int MAX_DETECTED_OBJECT_COUNT = 10;
     const double MIN_OBJECT_AREA = 10 * 10;
     const double MAX_OBJECT_AREA = (1920 * 1090) / 1.5;
+    const double MIN_DISTANCE_BETWEEN_CIRCLES_CENTERS = 50.0;
 
     // Initiate min and max HSV filter values.
     // We can change them using trackbars
@@ -91,6 +93,13 @@ private:
     int V_MIN_IDEAL = 119;
     int V_MAX_IDEAL = 145;
 
+    int H_MIN_IDEAL_HOUGH = 0;
+    int H_MAX_IDEAL_HOUGH = 256;
+    int S_MIN_IDEAL_HOUGH = 103;
+    int S_MAX_IDEAL_HOUGH = 256;
+    int V_MIN_IDEAL_HOUGH = 51;
+    int V_MAX_IDEAL_HOUGH = 187;
+
     enum TrackBarType {
         H_MIN_T, H_MAX_T,
         S_MIN_T, S_MAX_T,
@@ -108,11 +117,14 @@ private:
     void findBall();
     void drawObject(int, int, Mat*);
 
+    void tryHSVHoughCircles(const string &);
+    void detectCircles();
+
 
 public:
-    BallFinder(const string framePath, const FindMethod &refMethod);
-    BallFinder(const string videoPath);
-    ~BallFinder();
+    BallFinderTest(const string framePath, const FindMethod &refMethod);
+    BallFinderTest(const string videoPath);
+    ~BallFinderTest();
 };
 
 #endif //CAMERAOBJECTLOCATION_BALLFINDER_HPP
