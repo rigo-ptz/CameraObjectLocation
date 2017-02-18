@@ -40,6 +40,10 @@ void VideoBallFinder::processVideo(const string videoPath) {
 
         if (track.size() > 0) {
             drawObject(track.back().x, track.back().y, frame);
+            for (int i = 0; i < track.size(); ++i) {
+                if (i + 1 <=  track.size() - 1)
+                    line(frame, track[i], track[i + 1], Scalar(0,255,0), 2);
+            }
         }
 
         namedWindow(RESULT_WINDOW_NAME, CV_WINDOW_AUTOSIZE);
