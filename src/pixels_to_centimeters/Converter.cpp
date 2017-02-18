@@ -38,7 +38,7 @@ void Converter::convertFromPixelsToCantimeters(const float &x_pixel, const float
     perspectiveTransform(from, result, *pHomographyMatrix);
     x_coord = result[0].x;
     y_coord = result[0].y;
-    cout << "x: " << floor(result[0].x) << ", " << "y: " << floor(result[0].y);
+//    cout << "x: " << floor(result[0].x) << ", " << "y: " << floor(result[0].y);
 }
 
 void Converter::findHomographyMatrix() {

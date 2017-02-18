@@ -2,6 +2,7 @@
 #include <opencv2/opencv.hpp>
 #include "pixels_to_centimeters/Converter.hpp"
 #include "ball_find/BallFinderTest.hpp"
+#include "ball_find/video/VideoBallFinder.hpp"
 
 void initConverter();
 
@@ -10,7 +11,8 @@ using namespace cv;
 int main() {
     initConverter();
 
-    BallFinderTest *ballFinder = new BallFinderTest("res/edge.png", HSV_HOUGH_CIRCLES);
+//    BallFinderTest *ballFinder = new BallFinderTest("res/edge.png", HSV_HOUGH_CIRCLES);
+    VideoBallFinder ballFinder("res/video/test.mp4");
 
     waitKey(0);
     return 0;
